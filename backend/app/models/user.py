@@ -36,7 +36,7 @@ class UserCreate(UserBase):
     password: str = Field(min_length=8)
 
 
-class UserRead(UserBase):
+class UserResponse(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
@@ -46,3 +46,34 @@ class UserUpdate(SQLModel):
     email: Optional[EmailStr] = None
     name: Optional[str] = None
     password: Optional[str] = Field(default=None, min_length=8)
+
+# Auth-specific schemas
+class UserLogin(SQLModel):
+    """Schema for login request"""
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(SQLModel):
+    """Schema for token response"""
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenRequest(SQLModel):
+    """Schema for refresh token request"""
+    refresh_token: str
+
+
+class ChangePasswordRequest(SQLModel):
+    """Schema for changing password"""
+    current_password: str
+    new_password: str = Field(min_length=8)
+
+class ResetPasswordResponse(SQLModel):
+    message: str = "Password reset successfully"
+
+
+class ChangePasswordResponse(SQLModel):
+    message: str = "Password changed successfully"

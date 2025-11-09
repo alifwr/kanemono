@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from app.database import get_session
-from app.schemas.auth import (
-    RegisterRequest, RegisterResponse,
-    LoginRequest, TokenResponse,
+from app.models.user import (
+    UserCreate, UserResponse, UserUpdate,
+    UserLogin, TokenResponse,
     RefreshTokenRequest,
-    ChangePasswordRequest, ChangePasswordResponse,
-    UserProfile, UpdateProfileRequest
+    ChangePasswordRequest, ChangePasswordResponse
 )
 from app.services.user_service import UserService
 from app.core.security import create_access_token, create_refresh_token, decode_token, verify_token_type
@@ -16,9 +15,9 @@ from app.models.user import User
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(
-    request: RegisterRequest,
+    request: UserCreate,
     session: Session = Depends(get_session)
 ):
     """
@@ -31,16 +30,18 @@ def register(
         password=request.password
     )
     
-    return RegisterResponse(
+    return UserResponse(
         id=user.id or 0,
         email=user.email,
-        name=user.name
+        name=user.name,
+        created_at=user.created_at,
+        updated_at=user.updated_at
     )
 
 
 @router.post("/login", response_model=TokenResponse)
 def login(
-    request: LoginRequest,
+    request: UserLogin,
     session: Session = Depends(get_session)
 ):
     """
@@ -119,21 +120,23 @@ def refresh_token(
     )
 
 
-@router.get("/me", response_model=UserProfile)
+@router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     """
     Get current authenticated user profile
     """
-    return UserProfile(
+    return UserResponse(
         id=current_user.id or 0,
         email=current_user.email,
-        name=current_user.name
+        name=current_user.name,
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at
     )
 
 
-@router.patch("/me", response_model=UserProfile)
+@router.patch("/me", response_model=UserResponse)
 def update_me(
-    request: UpdateProfileRequest,
+    request: UserUpdate,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
@@ -147,10 +150,12 @@ def update_me(
         email=request.email
     )
     
-    return UserProfile(
+    return UserResponse(
         id=updated_user.id or 0,
         email=updated_user.email,
-        name=updated_user.name
+        name=updated_user.name,
+        created_at=updated_user.created_at,
+        updated_at=updated_user.updated_at
     )
 
 
