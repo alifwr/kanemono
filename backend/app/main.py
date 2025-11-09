@@ -1,14 +1,19 @@
-from typing import Union, Annotated
-from sqlmodel import Session
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+from app.database import create_db_and_tables
+from app.models import *  # Import all models to register them
 
-from app.services.database import create_db_and_tables
-from app.routes.user_route import router as user_router
-
-app = FastAPI()
+app = FastAPI(title="Accounting API", version="1.0.0")
 
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
 
-app.include_router(user_router, prefix="/api")
+@app.get("/")
+def root():
+    return {"message": "Accounting API is running"}
+
+# Import routers here later
+# from app.routers import users, accounts, transactions
+# app.include_router(users.router)
+# app.include_router(accounts.router)
+# app.include_router(transactions.router)
