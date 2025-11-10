@@ -51,31 +51,31 @@ app.include_router(accounts_router)
 
 
 # Custom OpenAPI schema for Bearer authentication
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
+# def custom_openapi():
+#     if app.openapi_schema:
+#         return app.openapi_schema
     
-    openapi_schema = get_openapi(
-        title=settings.APP_NAME,
-        version=settings.APP_VERSION,
-        description="Accounting Application API with JWT authentication",
-        routes=app.routes,
-    )
+#     openapi_schema = get_openapi(
+#         title=settings.APP_NAME,
+#         version=settings.APP_VERSION,
+#         description="Accounting Application API with JWT authentication",
+#         routes=app.routes,
+#     )
     
-    openapi_schema["components"]["securitySchemes"] = {
-        "Bearer": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "description": "Enter your JWT access token"
-        }
-    }
+#     openapi_schema["components"]["securitySchemes"] = {
+#         "Bearer": {
+#             "type": "http",
+#             "scheme": "bearer",
+#             "bearerFormat": "JWT",
+#             "description": "Enter your JWT access token"
+#         }
+#     }
     
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+#     app.openapi_schema = openapi_schema
+#     return app.openapi_schema
 
 
-app.openapi = custom_openapi
+# app.openapi = custom_openapi
 
 
 @app.get("/", tags=["Root"])
