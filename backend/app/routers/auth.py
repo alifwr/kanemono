@@ -2,26 +2,25 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from app.database import get_session
 from app.models.user import (
-    UserCreate, UserResponse, UserUpdate,
-    UserLogin, TokenResponse,
-    RefreshTokenRequest,
-    ChangePasswordRequest, ChangePasswordResponse
+    User, UserCreate, UserRead, UserLogin, UserProfile,
+    TokenResponse, RefreshTokenRequest, ChangePasswordRequest, UserUpdate
 )
 from app.services.user_service import UserService
 from app.core.security import create_access_token, create_refresh_token, decode_token, verify_token_type
 from app.core.dependencies import get_current_user
-from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register(
     request: UserCreate,
     session: Session = Depends(get_session)
 ):
     """
     Register a new user
+    
+    Automatically creates default chart of accounts for the new user
     """
     user = UserService.create_user(
         session=session,
@@ -29,14 +28,7 @@ def register(
         name=request.name,
         password=request.password
     )
-    
-    return UserResponse(
-        id=user.id or 0,
-        email=user.email,
-        name=user.name,
-        created_at=user.created_at,
-        updated_at=user.updated_at
-    )
+    return user
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -120,21 +112,27 @@ def refresh_token(
     )
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserProfile)
 def get_me(current_user: User = Depends(get_current_user)):
     """
     Get current authenticated user profile
+    
+    **Requires authentication**
     """
-    return UserResponse(
-        id=current_user.id or 0,
+    if current_user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="User ID is missing"
+        )
+    
+    return UserProfile(
+        id=current_user.id,
         email=current_user.email,
-        name=current_user.name,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at
+        name=current_user.name
     )
 
 
-@router.patch("/me", response_model=UserResponse)
+@router.patch("/me", response_model=UserProfile)
 def update_me(
     request: UserUpdate,
     current_user: User = Depends(get_current_user),
@@ -142,6 +140,8 @@ def update_me(
 ):
     """
     Update current user profile
+    
+    **Requires authentication**
     """
     updated_user = UserService.update_user(
         session=session,
@@ -150,16 +150,20 @@ def update_me(
         email=request.email
     )
     
-    return UserResponse(
-        id=updated_user.id or 0,
+    if updated_user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="User ID is missing"
+        )
+    
+    return UserProfile(
+        id=updated_user.id,
         email=updated_user.email,
-        name=updated_user.name,
-        created_at=updated_user.created_at,
-        updated_at=updated_user.updated_at
+        name=updated_user.name
     )
 
 
-@router.post("/change-password", response_model=ChangePasswordResponse)
+@router.post("/change-password")
 def change_password(
     request: ChangePasswordRequest,
     current_user: User = Depends(get_current_user),
@@ -167,6 +171,8 @@ def change_password(
 ):
     """
     Change current user's password
+    
+    **Requires authentication**
     """
     UserService.change_password(
         session=session,
@@ -175,13 +181,16 @@ def change_password(
         new_password=request.new_password
     )
     
-    return ChangePasswordResponse()
+    return {"message": "Password changed successfully"}
 
 
 @router.post("/logout")
 def logout(current_user: User = Depends(get_current_user)):
     """
     Logout (client should discard tokens)
+    
+    **Requires authentication**
+    
     Note: JWT tokens are stateless, so logout is handled client-side
     """
     return {"message": "Logged out successfully"}

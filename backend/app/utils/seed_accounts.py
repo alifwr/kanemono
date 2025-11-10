@@ -1,15 +1,16 @@
 from sqlmodel import Session
 from app.models.account import Account, AccountType, NormalBalance
-from app.models.user import User
 
 
 def create_default_accounts(session: Session, user_id: int):
     """
     Create default chart of accounts for a new user
-    Standard accounting structure
+    Standard accounting structure following the accounting equation
     """
     default_accounts = [
+        # ========================================
         # ASSETS (1000-1999)
+        # ========================================
         {
             "code": "1000",
             "name": "Assets",
@@ -25,7 +26,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.ASSET,
             "subtype": "Group",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Short-term assets",
+            "description": "Short-term assets (liquid within 1 year)",
             "parent_code": "1000"
         },
         {
@@ -43,7 +44,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.ASSET,
             "subtype": "Current Asset",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Main bank account",
+            "description": "Main checking/current account",
             "parent_code": "1100"
         },
         {
@@ -52,11 +53,13 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.ASSET,
             "subtype": "Current Asset",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Savings account",
+            "description": "Savings and deposit accounts",
             "parent_code": "1100"
         },
         
+        # ========================================
         # LIABILITIES (2000-2999)
+        # ========================================
         {
             "code": "2000",
             "name": "Liabilities",
@@ -72,7 +75,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.LIABILITY,
             "subtype": "Group",
             "normal_balance": NormalBalance.CREDIT,
-            "description": "Short-term liabilities",
+            "description": "Short-term liabilities (due within 1 year)",
             "parent_code": "2000"
         },
         {
@@ -90,11 +93,13 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.LIABILITY,
             "subtype": "Current Liability",
             "normal_balance": NormalBalance.CREDIT,
-            "description": "Short-term loans",
+            "description": "Short-term loans and borrowings",
             "parent_code": "2100"
         },
         
+        # ========================================
         # EQUITY (3000-3999)
+        # ========================================
         {
             "code": "3000",
             "name": "Equity",
@@ -114,7 +119,9 @@ def create_default_accounts(session: Session, user_id: int):
             "parent_code": "3000"
         },
         
+        # ========================================
         # REVENUE (4000-4999)
+        # ========================================
         {
             "code": "4000",
             "name": "Revenue",
@@ -130,7 +137,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.REVENUE,
             "subtype": "Operating Income",
             "normal_balance": NormalBalance.CREDIT,
-            "description": "Monthly salary",
+            "description": "Monthly salary and wages",
             "parent_code": "4000"
         },
         {
@@ -139,7 +146,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.REVENUE,
             "subtype": "Operating Income",
             "normal_balance": NormalBalance.CREDIT,
-            "description": "Business revenue",
+            "description": "Business and self-employment revenue",
             "parent_code": "4000"
         },
         {
@@ -148,11 +155,13 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.REVENUE,
             "subtype": "Non-Operating Income",
             "normal_balance": NormalBalance.CREDIT,
-            "description": "Dividends, interest",
+            "description": "Dividends, interest, capital gains",
             "parent_code": "4000"
         },
         
+        # ========================================
         # EXPENSES (5000-5999)
+        # ========================================
         {
             "code": "5000",
             "name": "Expenses",
@@ -162,13 +171,15 @@ def create_default_accounts(session: Session, user_id: int):
             "description": "All expense accounts",
             "parent_code": None
         },
+        
+        # Housing
         {
             "code": "5100",
             "name": "Housing Expenses",
             "type": AccountType.EXPENSE,
             "subtype": "Group",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Housing related expenses",
+            "description": "Housing and accommodation expenses",
             "parent_code": "5000"
         },
         {
@@ -186,16 +197,18 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Housing",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Electricity, water, gas",
+            "description": "Electricity, water, gas, internet",
             "parent_code": "5100"
         },
+        
+        # Food
         {
             "code": "5200",
             "name": "Food Expenses",
             "type": AccountType.EXPENSE,
             "subtype": "Group",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Food related expenses",
+            "description": "Food and dining expenses",
             "parent_code": "5000"
         },
         {
@@ -204,7 +217,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Food",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Grocery shopping",
+            "description": "Supermarket and grocery shopping",
             "parent_code": "5200"
         },
         {
@@ -213,16 +226,18 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Food",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Restaurants, cafes",
+            "description": "Restaurants, cafes, food delivery",
             "parent_code": "5200"
         },
+        
+        # Transportation
         {
             "code": "5300",
             "name": "Transportation",
             "type": AccountType.EXPENSE,
             "subtype": "Group",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Transportation expenses",
+            "description": "Transportation and vehicle expenses",
             "parent_code": "5000"
         },
         {
@@ -231,7 +246,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Transportation",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Vehicle fuel",
+            "description": "Vehicle fuel and gas",
             "parent_code": "5300"
         },
         {
@@ -240,16 +255,18 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Transportation",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Bus, train, taxi",
+            "description": "Bus, train, taxi, ride-sharing",
             "parent_code": "5300"
         },
+        
+        # Other common expenses
         {
             "code": "5400",
             "name": "Entertainment",
             "type": AccountType.EXPENSE,
             "subtype": "Operating Expense",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Entertainment and leisure",
+            "description": "Movies, games, hobbies, leisure",
             "parent_code": "5000"
         },
         {
@@ -258,7 +275,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Operating Expense",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Medical expenses",
+            "description": "Medical, dental, pharmacy expenses",
             "parent_code": "5000"
         },
         {
@@ -267,7 +284,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Operating Expense",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Education and training",
+            "description": "Tuition, books, courses, training",
             "parent_code": "5000"
         },
         {
@@ -276,7 +293,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Operating Expense",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "General shopping",
+            "description": "Clothing, electronics, household items",
             "parent_code": "5000"
         },
         {
@@ -285,7 +302,7 @@ def create_default_accounts(session: Session, user_id: int):
             "type": AccountType.EXPENSE,
             "subtype": "Operating Expense",
             "normal_balance": NormalBalance.DEBIT,
-            "description": "Insurance premiums",
+            "description": "Insurance premiums (health, life, etc.)",
             "parent_code": "5000"
         },
         {
@@ -300,9 +317,9 @@ def create_default_accounts(session: Session, user_id: int):
     ]
     
     # Create accounts in two passes to handle parent-child relationships
-    # Pass 1: Create all accounts without parent relationships
     account_map = {}  # Map code to account ID
     
+    # Pass 1: Create all accounts without parent relationships
     for acc_data in default_accounts:
         account = Account(
             user_id=user_id,
@@ -318,21 +335,17 @@ def create_default_accounts(session: Session, user_id: int):
         account_map[acc_data["code"]] = account.id
     
     # Pass 2: Update parent relationships
+    from sqlmodel import select
     for acc_data in default_accounts:
         if acc_data["parent_code"]:
-            account_code = acc_data["code"]
-            parent_code = acc_data["parent_code"]
-            
-            # Find the account and update its parent_id
-            from sqlmodel import select
             statement = select(Account).where(
                 Account.user_id == user_id,
-                Account.code == account_code
+                Account.code == acc_data["code"]
             )
             account = session.exec(statement).first()
             
-            if account and parent_code in account_map:
-                account.parent_id = account_map[parent_code]
+            if account and acc_data["parent_code"] in account_map:
+                account.parent_id = account_map[acc_data["parent_code"]]
                 session.add(account)
     
     # Commit all changes

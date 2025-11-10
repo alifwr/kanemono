@@ -1,4 +1,4 @@
-from .user import User, UserCreate, UserResponse, UserUpdate
+from .user import User, UserCreate, UserRead, UserUpdate
 from .account import (
     Account, 
     AccountCreate, 
@@ -52,7 +52,7 @@ from .budget import (
 
 __all__ = [
     # User
-    "User", "UserCreate", "UserResponse", "UserUpdate",
+    "User", "UserCreate", "UserRead", "UserUpdate",
     
     # Account
     "Account", "AccountCreate", "AccountRead", "AccountUpdate", 

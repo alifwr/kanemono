@@ -24,7 +24,7 @@ class UserService:
     
     @staticmethod
     def create_user(session: Session, email: str, name: str, password: str) -> User:
-        """Create a new user"""
+        """Create a new user and seed default accounts"""
         # Check if user already exists
         existing_user = UserService.get_user_by_email(session, email)
         if existing_user:
@@ -44,6 +44,11 @@ class UserService:
         session.add(user)
         session.commit()
         session.refresh(user)
+        
+        # Create default accounts for new user
+        from app.utils.seed_accounts import create_default_accounts
+        if user.id is not None:
+            create_default_accounts(session, user.id)
         
         return user
     

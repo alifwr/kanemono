@@ -11,6 +11,10 @@ if TYPE_CHECKING:
     from .budget import Budget
 
 
+# ============================================
+# BASE & TABLE MODEL
+# ============================================
+
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     name: str = Field(max_length=255)
@@ -32,26 +36,32 @@ class User(UserBase, table=True):
     budgets: list["Budget"] = Relationship(back_populates="user", cascade_delete=True)
 
 
+# ============================================
+# API SCHEMAS
+# ============================================
+
 class UserCreate(UserBase):
-    password: str = Field(min_length=8)
+    """Schema for user registration"""
+    password: str = Field(min_length=8, max_length=128)
 
 
-class UserResponse(UserBase):
+class UserRead(UserBase):
+    """Schema for user profile response"""
     id: int
     created_at: datetime
     updated_at: datetime
 
 
 class UserUpdate(SQLModel):
+    """Schema for updating user profile"""
     email: Optional[EmailStr] = None
     name: Optional[str] = None
-    password: Optional[str] = Field(default=None, min_length=8)
 
-# Auth-specific schemas
+
 class UserLogin(SQLModel):
     """Schema for login request"""
     email: EmailStr
-    password: str
+    password: str = Field(max_length=128)
 
 
 class TokenResponse(SQLModel):
@@ -68,12 +78,12 @@ class RefreshTokenRequest(SQLModel):
 
 class ChangePasswordRequest(SQLModel):
     """Schema for changing password"""
-    current_password: str
-    new_password: str = Field(min_length=8)
-
-class ResetPasswordResponse(SQLModel):
-    message: str = "Password reset successfully"
+    current_password: str = Field(max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
 
 
-class ChangePasswordResponse(SQLModel):
-    message: str = "Password changed successfully"
+class UserProfile(SQLModel):
+    """Schema for user profile (alias for UserRead)"""
+    id: int
+    email: str
+    name: str

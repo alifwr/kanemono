@@ -1,8 +1,9 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from decimal import Decimal
 from enum import Enum
+from pydantic import field_validator
 
 if TYPE_CHECKING:
     from .user import User
@@ -10,6 +11,10 @@ if TYPE_CHECKING:
     from .recurring import RecurringLine
     from .budget import Budget
 
+
+# ============================================
+# ENUMS
+# ============================================
 
 class AccountType(str, Enum):
     ASSET = "Asset"
@@ -23,6 +28,10 @@ class NormalBalance(str, Enum):
     DEBIT = "Debit"
     CREDIT = "Credit"
 
+
+# ============================================
+# BASE & TABLE MODEL
+# ============================================
 
 class AccountBase(SQLModel):
     code: str = Field(max_length=20, index=True)
@@ -56,26 +65,89 @@ class Account(AccountBase, table=True):
     budgets: list["Budget"] = Relationship(back_populates="account")
 
 
+# ============================================
+# API SCHEMAS
+# ============================================
+
 class AccountCreate(AccountBase):
-    user_id: int
+    """Schema for creating a new account"""
+    parent_id: Optional[int] = Field(None, description="Parent account ID for hierarchy")
+    
+    @field_validator('code')
+    def validate_code_format(cls, v):
+        if not v.isdigit():
+            raise ValueError('Account code must contain only digits')
+        if len(v) < 4:
+            raise ValueError('Account code must be at least 4 digits')
+        return v
+
+
+class AccountUpdate(SQLModel):
+    """Schema for updating an account"""
+    code: Optional[str] = Field(None, max_length=20)
+    name: Optional[str] = Field(None, max_length=255)
+    type: Optional[AccountType] = None
+    subtype: Optional[str] = Field(None, max_length=50)
+    normal_balance: Optional[NormalBalance] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
     parent_id: Optional[int] = None
 
 
 class AccountRead(AccountBase):
+    """Schema for account response"""
     id: int
     user_id: int
     parent_id: Optional[int]
     balance: Decimal
     created_at: datetime
     updated_at: datetime
+    
+    # class Config:
+    #     from_attributes = True
 
 
-class AccountUpdate(SQLModel):
-    code: Optional[str] = None
-    name: Optional[str] = None
-    type: Optional[AccountType] = None
-    subtype: Optional[str] = None
-    normal_balance: Optional[NormalBalance] = None
-    description: Optional[str] = None
-    is_active: Optional[bool] = None
-    parent_id: Optional[int] = None
+class AccountDetail(AccountRead):
+    """Schema for detailed account view with relationships"""
+    parent: Optional[AccountRead] = None
+    children: List[AccountRead] = []
+    
+    # class Config:
+    #     from_attributes = True
+
+
+class AccountTree(SQLModel):
+    """Schema for hierarchical account tree"""
+    id: int
+    code: str
+    name: str
+    type: AccountType
+    balance: Decimal
+    is_active: bool
+    children: List['AccountTree'] = []
+    
+    # class Config:
+    #     from_attributes = True
+
+
+class AccountListResponse(SQLModel):
+    """Schema for paginated account list"""
+    total: int
+    page: int
+    page_size: int
+    accounts: List[AccountRead]
+
+
+class AccountSummary(SQLModel):
+    """Schema for account statistics summary"""
+    total_accounts: int
+    assets_count: int
+    liabilities_count: int
+    equity_count: int
+    revenue_count: int
+    expense_count: int
+    total_assets: Decimal
+    total_liabilities: Decimal
+    total_equity: Decimal
+    total_revenue: Decimal
+    total_expenses: Decimal
