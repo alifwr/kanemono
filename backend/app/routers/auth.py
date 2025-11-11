@@ -8,6 +8,7 @@ from app.models.user import (
 from app.services.user_service import UserService
 from app.core.security import create_access_token, create_refresh_token, decode_token, verify_token_type
 from app.core.dependencies import get_current_user
+from app.services.category_service import create_default_categories
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -28,6 +29,7 @@ def register(
         name=request.name,
         password=request.password
     )
+    create_default_categories(session, user)
     return user
 
 

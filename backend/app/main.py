@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from contextlib import asynccontextmanager
 from app.database import create_db_and_tables, test_connection
-from app.routers import auth_router, accounts_router
+from app.routers import auth_router, accounts_router, categories_router
 from app.core.config import settings
 
 
@@ -48,6 +48,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(accounts_router)
+app.include_router(categories_router)
 
 
 # Custom OpenAPI schema for Bearer authentication
